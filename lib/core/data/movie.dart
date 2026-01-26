@@ -9,12 +9,12 @@ class Movie {
   final bool video;
 
   @JsonKey(name: 'backdrop_path')
-  final String backdropPath;
+  final String? backdropPath;
   @JsonKey(name: 'genre_ids')
   final List<int> genreIds;
   final String overview;
   @JsonKey(name: 'poster_path')
-  final String posterPath;
+  final String? posterPath;
   @JsonKey(name: 'release_date')
   final String releaseDate;
   @JsonKey(name: 'vote_count')

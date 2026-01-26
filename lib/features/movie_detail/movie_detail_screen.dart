@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_movie_app/core/data/movie.dart';
 
-class MovieDetailScreen extends StatefulWidget {
-  const MovieDetailScreen({super.key});
+class MovieDetailScreen extends StatelessWidget {
+  const MovieDetailScreen({super.key, required this.movie});
+  final Movie movie;
 
-  @override
-  State<MovieDetailScreen> createState() => _MovieDetailScreenState();
-}
-
-class _MovieDetailScreenState extends State<MovieDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Center(child: Text('Home', style: TextStyle(color: Colors.white))),
-      ],
+    return Scaffold(
+      appBar: AppBar(title: Text(movie.title)),
+      body: Center(
+        child: Column(
+          children: [
+            Text(movie.overview, style: TextStyle(color: Colors.white)),
+            Text(movie.releaseDate),
+          ],
+        ),
+      ),
     );
   }
 }

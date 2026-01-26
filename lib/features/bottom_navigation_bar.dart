@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_movie_app/common/widgets/search_bar.dart';
 import 'package:flutter_movie_app/constants/color.dart';
 import 'package:flutter_movie_app/constants/images.dart';
 import 'package:flutter_movie_app/constants/size.dart';
+import 'package:flutter_movie_app/core/api.dart';
+import 'package:flutter_movie_app/core/data/movie.dart';
 import 'package:flutter_movie_app/features/home/home_screen.dart';
 import 'package:flutter_movie_app/features/profile/profile_screen.dart';
 import 'package:flutter_movie_app/features/saved/saved_screen.dart';
@@ -16,20 +20,71 @@ class MBottomNav extends StatefulWidget {
 }
 
 class _MBottomNavState extends State<MBottomNav> {
+  final TextEditingController _controller = TextEditingController();
+  final dio = DioClient().dio;
   int _selectedIndex = 0;
-
-  // screens
-  final List<Widget> _screens = [
-    HomeScreen(),
-    SearchScreen(),
-    SavedScreen(),
-    ProfileScreen(),
-  ];
+  List<Movie> _movies = [];
+  Timer? _debounce;
 
   void changeSelectedIndex(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) {
+      _debounce!.cancel();
+    }
+
+    _debounce = Timer(Duration(milliseconds: 500), () {
+      if (value.isNotEmpty) {
+        _handleSearch(value);
+      }
+    });
+  }
+
+  Future<void> _handleSearch(String value) async {
+    try {
+      if (value.isEmpty) {
+        return;
+      }
+      debugPrint('value is $value');
+      final response = await dio.get(
+        '/search/movie',
+        queryParameters: {"query": value},
+      );
+
+      //  change List<dynamic> to List<Map<String, dynamic>
+      final data = (response.data['results'] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList();
+
+      for (final movie in data) {
+        debugPrint('movie is $movie\n -----------------');
+      }
+      if (data.isEmpty) {
+        setState(() {
+          _movies = [];
+        });
+        return;
+      }
+
+      final queriedMovies = data.map((movie) => Movie.fromJson(movie)).toList();
+
+      setState(() {
+        _movies = queriedMovies;
+      });
+    } catch (e) {
+      debugPrint('Error handle search: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 
   @override
@@ -63,10 +118,16 @@ class _MBottomNavState extends State<MBottomNav> {
                 children: [
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 18.0),
-                    child: MSearchBar(onTap: () => changeSelectedIndex(1)),
+                    child: MSearchBar(
+                      controller: _controller,
+                      onTap: () {
+                        changeSelectedIndex(1);
+                      },
+                      onChanged: _onSearchChanged,
+                    ),
                   ),
 
-                  _screens[_selectedIndex],
+                  _buildScreen(),
                 ],
               ),
             ),
@@ -125,38 +186,26 @@ class _MBottomNavState extends State<MBottomNav> {
           ],
         ),
       ),
-      // bottomNavigationBar: NavigationBar(
-      //   selectedIndex: _selectedIndex,
-      //   onDestinationSelected: (value) {
-      //     changeSelectedIndex(value);
-      //   },
-      //
-      //   destinations: [
-      //     // Home
-      //     NavigationDestination(
-      //       // icon: Image.asset(MImage.homeIcon),
-      //       icon: Icon(Icons.home_filled, ),
-      //
-      //       label: 'Home',
-      //     ),
-      //     // Search
-      //     NavigationDestination(
-      //       icon: Image.asset(MImage.searchIcon),
-      //       label: 'Search',
-      //     ),
-      //     // Saved
-      //     NavigationDestination(
-      //       icon: Image.asset(MImage.saveIcon),
-      //       label: 'Save',
-      //     ),
-      //     // Profile
-      //     NavigationDestination(
-      //       icon: Image.asset(MImage.personIcon),
-      //       label: 'Profile',
-      //     ),
-      //   ],
-      // ),
     );
+  }
+
+  Widget _buildScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return HomeScreen();
+
+      case 1:
+        return SearchScreen(movies: _movies, query: _controller.text);
+
+      case 2:
+        return SavedScreen();
+
+      case 3:
+        return ProfileScreen();
+
+      default:
+        return HomeScreen();
+    }
   }
 }
 
@@ -190,10 +239,9 @@ class MBottomNavItem extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isActive ? MColor.lightPink : Colors.black,
-          borderRadius:
-              isActive
-                  ? BorderRadius.circular(50.0)
-                  : BorderRadius.circular(0.0),
+          borderRadius: isActive
+              ? BorderRadius.circular(50.0)
+              : BorderRadius.circular(0.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

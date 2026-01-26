@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_movie_app/constants/color.dart';
 
 class MSearchBar extends StatelessWidget {
-  const MSearchBar({super.key, this.onTap});
+  const MSearchBar({
+    super.key,
+    this.onTap,
+    required this.controller,
+    required this.onChanged,
+  });
 
   final VoidCallback? onTap;
+  final Function(String value) onChanged;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
     return SearchBar(
+      controller: controller,
+      onChanged: onChanged,
       onTap: onTap,
       leading: Icon(Icons.search, color: MColor.lightPink),
       padding: WidgetStateProperty.resolveWith((state) {
