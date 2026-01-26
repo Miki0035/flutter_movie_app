@@ -89,9 +89,6 @@ class _MBottomNavState extends State<MBottomNav> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.viewPaddingOf(context).bottom;
-    debugPrint('height $height');
-
     return Scaffold(
       extendBody: true,
       body: Container(
@@ -134,56 +131,58 @@ class _MBottomNavState extends State<MBottomNav> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: height * 0.2),
-        padding: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.0),
-          color: MColor.lightDark,
-        ),
-        child: Row(
-          children: [
-            // Home
-            Flexible(
-              flex: _selectedIndex == 0 ? 2 : 1,
-              child: MBottomNavItem(
-                isActive: _selectedIndex == 0,
-                icon: Icons.home,
-                label: 'Home',
-                onTap: () => changeSelectedIndex(0),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
+            color: MColor.lightDark,
+          ),
+          child: Row(
+            children: [
+              // Home
+              Flexible(
+                flex: _selectedIndex == 0 ? 2 : 1,
+                child: MBottomNavItem(
+                  isActive: _selectedIndex == 0,
+                  icon: Icons.home,
+                  label: 'Home',
+                  onTap: () => changeSelectedIndex(0),
+                ),
               ),
-            ),
-            // Search
-            Flexible(
-              flex: _selectedIndex == 1 ? 2 : 1,
-              child: MBottomNavItem(
-                isActive: _selectedIndex == 1,
-                icon: Icons.search,
-                label: 'Search',
-                onTap: () => changeSelectedIndex(1),
+              // Search
+              Flexible(
+                flex: _selectedIndex == 1 ? 2 : 1,
+                child: MBottomNavItem(
+                  isActive: _selectedIndex == 1,
+                  icon: Icons.search,
+                  label: 'Search',
+                  onTap: () => changeSelectedIndex(1),
+                ),
               ),
-            ),
-            // Saved
-            Flexible(
-              flex: _selectedIndex == 2 ? 2 : 1,
-              child: MBottomNavItem(
-                isActive: _selectedIndex == 2,
-                icon: Icons.bookmark_outline,
-                label: 'Saved',
-                onTap: () => changeSelectedIndex(2),
+              // Saved
+              Flexible(
+                flex: _selectedIndex == 2 ? 2 : 1,
+                child: MBottomNavItem(
+                  isActive: _selectedIndex == 2,
+                  icon: Icons.bookmark_outline,
+                  label: 'Saved',
+                  onTap: () => changeSelectedIndex(2),
+                ),
               ),
-            ),
-            // Profile
-            Flexible(
-              flex: _selectedIndex == 3 ? 2 : 1,
-              child: MBottomNavItem(
-                isActive: _selectedIndex == 3,
-                icon: Icons.person,
-                label: 'Profile',
-                onTap: () => changeSelectedIndex(3),
+              // Profile
+              Flexible(
+                flex: _selectedIndex == 3 ? 2 : 1,
+                child: MBottomNavItem(
+                  isActive: _selectedIndex == 3,
+                  icon: Icons.person,
+                  label: 'Profile',
+                  onTap: () => changeSelectedIndex(3),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
