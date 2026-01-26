@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_movie_app/common/widgets/search_bar.dart';
 import 'package:flutter_movie_app/constants/color.dart';
 import 'package:flutter_movie_app/constants/images.dart';
 import 'package:flutter_movie_app/constants/size.dart';
@@ -33,6 +34,9 @@ class _MBottomNavState extends State<MBottomNav> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.viewPaddingOf(context).bottom;
+    debugPrint('height $height');
+
     return Scaffold(
       extendBody: true,
       body: Container(
@@ -54,12 +58,23 @@ class _MBottomNavState extends State<MBottomNav> {
               ),
             ),
             // screens
-            SliverToBoxAdapter(child: _screens[_selectedIndex]),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 18.0),
+                    child: MSearchBar(onTap: () => changeSelectedIndex(1)),
+                  ),
+
+                  _screens[_selectedIndex],
+                ],
+              ),
+            ),
           ],
         ),
       ),
       bottomNavigationBar: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: height * 0.2),
         padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.0),
