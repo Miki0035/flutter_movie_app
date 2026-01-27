@@ -14,7 +14,9 @@ class MovieCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => MovieDetailScreen(movie: movie)),
+          MaterialPageRoute(
+            builder: (_) => MovieDetailScreen(movieId: movie.id),
+          ),
         );
       },
       child: Container(

@@ -60,9 +60,6 @@ class _MBottomNavState extends State<MBottomNav> {
           .map((e) => e as Map<String, dynamic>)
           .toList();
 
-      for (final movie in data) {
-        debugPrint('movie is $movie\n -----------------');
-      }
       if (data.isEmpty) {
         setState(() {
           _movies = [];

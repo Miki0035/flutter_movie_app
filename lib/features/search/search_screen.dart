@@ -43,10 +43,7 @@ class SearchScreen extends StatelessWidget {
             shrinkWrap: true,
             itemCount: movies.length,
             itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {},
-                child: MovieCard(movie: movies[index]),
-              );
+              return MovieCard(movie: movies[index]);
             },
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
