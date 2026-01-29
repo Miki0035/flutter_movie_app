@@ -234,7 +234,9 @@ class MBottomNavItem extends StatelessWidget {
           horizontal: paddingHorizontal,
         ),
         decoration: BoxDecoration(
-          color: isActive ? MColor.lightPink : Colors.black,
+          image: isActive
+              ? DecorationImage(image: AssetImage(MImage.highlight))
+              : null,
           borderRadius: isActive
               ? BorderRadius.circular(50.0)
               : BorderRadius.circular(0.0),

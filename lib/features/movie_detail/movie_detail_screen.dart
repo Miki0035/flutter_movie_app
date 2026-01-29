@@ -287,7 +287,10 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             if (!result) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Failed to load data'),
+                                  content: Text(
+                                    'Failed to load data',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
