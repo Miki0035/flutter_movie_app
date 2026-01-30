@@ -46,7 +46,7 @@ class MBottomNavItem extends StatelessWidget {
             Icon(
               icon,
               color: isActive ? Colors.black : Colors.grey,
-              size: 25.0,
+              size: 18.0,
             ),
             SizedBox(width: 4.0),
             // Label
@@ -56,7 +56,7 @@ class MBottomNavItem extends StatelessWidget {
                 style: TextStyle(
                   color: MColor.dark,
                   fontWeight: FontWeight.w800,
-                  fontSize: MSize.medium,
+                  fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                 ),
               ),
           ],

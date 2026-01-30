@@ -24,12 +24,7 @@ class MBottomNav extends StatefulWidget {
 }
 
 class _MBottomNavState extends State<MBottomNav> {
-  final TextEditingController _controller = TextEditingController();
-  final dio = DioClient().dio;
   int _selectedIndex = 0;
-  List<Movie> _movies = [];
-  Timer? _debounce;
-  bool _isSearching = false;
 
   void changeSelectedIndex(int index) {
     setState(() {
@@ -37,160 +32,15 @@ class _MBottomNavState extends State<MBottomNav> {
     });
   }
 
-  void _onSearchChanged(String value) {
-    if (_debounce?.isActive ?? false) {
-      _debounce!.cancel();
-    }
-
-    _debounce = Timer(Duration(milliseconds: 500), () async {
-      if (value.isEmpty) {
-        setState(() {
-          _movies = [];
-          _isSearching = false;
-        });
-        return;
-      }
-
-      setState(() {
-        _isSearching = true;
-      });
-
-      await _handleSearch(value);
-
-      setState(() {
-        _isSearching = false;
-      });
-    });
-  }
-
-  Future<void> _handleSearch(String value) async {
-    try {
-      if (value.isEmpty) {
-        return;
-      }
-      debugPrint('value is $value');
-      final response = await dio.get(
-        '/search/movie',
-        queryParameters: {"query": value},
-      );
-
-      //  change List<dynamic> to List<Map<String, dynamic>
-      final data = (response.data['results'] as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList();
-
-      if (data.isEmpty) {
-        setState(() {
-          _movies = [];
-        });
-        return;
-      }
-
-      final queriedMovies = data.map((movie) => Movie.fromJson(movie)).toList();
-      final firstQueriedMovie = queriedMovies[0];
-
-      // query appwrite if movie exists in database and update count
-      final result = await AppwriteService.instance.tables.listRows(
-        databaseId: Env.appwriteDatabaseId,
-        tableId: Env.appwriteTableId,
-        queries: [Query.equal("searchTerm", value)],
-      );
-
-      if (result.rows.isNotEmpty) {
-        // search Term exists
-        // update database
-        final existingMovie = result.rows[0];
-        await AppwriteService.instance.tables.updateRow(
-          databaseId: Env.appwriteDatabaseId,
-          tableId: Env.appwriteTableId,
-          rowId: existingMovie.$id,
-          data: {"count": existingMovie.data["count"] + 1},
-        );
-        return;
-      } else {
-        // create new record for searchTerm
-        final newRecord = TrendingMovie(
-          searchTerm: value,
-          count: 1,
-          posterUrl:
-              'https://image.tmdb.org/t/p/w500${firstQueriedMovie.posterPath}',
-          movieId: firstQueriedMovie.id,
-          title: firstQueriedMovie.title,
-        );
-        await AppwriteService.instance.tables.createRow(
-          databaseId: Env.appwriteDatabaseId,
-          tableId: Env.appwriteTableId,
-          rowId: ID.unique(),
-          data: newRecord.toJson(),
-        );
-      }
-
-      setState(() {
-        _movies = queriedMovies;
-      });
-
-      return;
-    } catch (e) {
-      debugPrint('Error handle search: $e');
-      rethrow;
-    }
-  }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    _controller.clear();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(MImage.bg),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              sliver: SliverAppBar(
-                backgroundColor: Colors.transparent,
-                centerTitle: true,
-                title: Image.asset(MImage.logoIcon),
-                expandedHeight: 100.0,
-              ),
-            ),
-            // screens
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 18.0),
-                    child: MSearchBar(
-                      controller: _controller,
-                      onTap: () {
-                        changeSelectedIndex(1);
-                      },
-                      onChanged: _onSearchChanged,
-                    ),
-                  ),
-
-                  _buildScreen(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _buildScreen(),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
           padding: EdgeInsets.all(8.0),
+          margin: EdgeInsets.symmetric(horizontal: 12.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16.0),
             color: MColor.lightDark,
@@ -242,15 +92,61 @@ class _MBottomNavState extends State<MBottomNav> {
         ),
       ),
     );
+    // return Scaffold(
+    //   extendBody: true,
+    //   body: Container(
+    //     decoration: BoxDecoration(
+    //       image: DecorationImage(
+    //         image: AssetImage(MImage.bg),
+    //         fit: BoxFit.cover,
+    //       ),
+    //     ),
+    //     child: CustomScrollView(
+    //       slivers: [
+    //         SliverPadding(
+    //           padding: const EdgeInsets.symmetric(vertical: 16.0),
+    //           sliver: SliverAppBar(
+    //             backgroundColor: Colors.transparent,
+    //             centerTitle: true,
+    //             title: Image.asset(MImage.logoIcon),
+    //             expandedHeight: 100.0,
+    //           ),
+    //         ),
+    //         // screens
+    //         SliverToBoxAdapter(
+    //           child: Column(
+    //             children: [
+    //               Container(
+    //                 margin: EdgeInsets.symmetric(vertical: 18.0),
+    //                 child: MSearchBar(
+    //                   controller: _controller,
+    //                   onTap: () {
+    //                     changeSelectedIndex(1);
+    //                   },
+    //                   onChanged: _onSearchChanged,
+    //                 ),
+    //               ),
+    //
+    //               _buildScreen(),
+    //             ],
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
   }
 
   Widget _buildScreen() {
     switch (_selectedIndex) {
       case 0:
-        return HomeScreen();
+        return HomeScreen(
+          onTap: () {
+            changeSelectedIndex(1);
+          },
+        );
 
       case 1:
-        return SearchScreen(movies: _movies, query: _controller.text);
+        return SearchScreen();
 
       case 2:
         return SavedScreen();
@@ -259,7 +155,11 @@ class _MBottomNavState extends State<MBottomNav> {
         return ProfileScreen();
 
       default:
-        return HomeScreen();
+        return HomeScreen(
+          onTap: () {
+            changeSelectedIndex(1);
+          },
+        );
     }
   }
 }

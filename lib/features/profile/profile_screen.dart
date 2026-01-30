@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_movie_app/constants/images.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Center(child: Text('Profile', style: TextStyle(color: Colors.white))),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(image: AssetImage(MImage.bg), fit: BoxFit.cover),
+      ),
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.person, size: 32.0),
+            SizedBox(height: 4.0),
+            Text(
+              'Profile',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: Theme.of(context).textTheme.titleMedium!.fontSize,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

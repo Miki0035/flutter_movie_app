@@ -59,6 +59,7 @@ class MovieCard extends StatelessWidget {
                   '${(movie.voteAverage / 2).roundToDouble()}',
                   style: TextStyle(
                     color: Colors.white,
+                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
