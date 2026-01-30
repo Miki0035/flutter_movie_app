@@ -5,4 +5,16 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'TMDB_API_KEY', obfuscate: true)
   static final String tmdbApiKey = _Env.tmdbApiKey;
+
+  @EnviedField(varName: 'APPWRITE_ENDPOINT', obfuscate: true)
+  static final String appwriteEndPoint = _Env.appwriteEndPoint;
+
+  @EnviedField(varName: 'APPWRITE_PROJECT_ID', obfuscate: true)
+  static final String appwriteProjectId = _Env.appwriteProjectId;
+
+  @EnviedField(varName: 'APPWRITE_DATABASE_ID', obfuscate: true)
+  static final String appwriteDatabaseId = _Env.appwriteDatabaseId;
+
+  @EnviedField(varName: 'APPWRITE_TABLE_ID', obfuscate: true)
+  static final String appwriteTableId = _Env.appwriteTableId;
 }

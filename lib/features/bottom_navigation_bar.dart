@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_movie_app/common/widgets/bottom_nav_item.dart';
 import 'package:flutter_movie_app/common/widgets/search_bar.dart';
 import 'package:flutter_movie_app/constants/color.dart';
 import 'package:flutter_movie_app/constants/images.dart';
-import 'package:flutter_movie_app/constants/size.dart';
 import 'package:flutter_movie_app/core/api.dart';
+import 'package:flutter_movie_app/core/appwrite.dart';
 import 'package:flutter_movie_app/core/data/movie.dart';
+import 'package:flutter_movie_app/core/data/trending_movie.dart';
+import 'package:flutter_movie_app/core/env/env.dart';
 import 'package:flutter_movie_app/features/home/home_screen.dart';
 import 'package:flutter_movie_app/features/profile/profile_screen.dart';
 import 'package:flutter_movie_app/features/saved/saved_screen.dart';
@@ -25,6 +29,7 @@ class _MBottomNavState extends State<MBottomNav> {
   int _selectedIndex = 0;
   List<Movie> _movies = [];
   Timer? _debounce;
+  bool _isSearching = false;
 
   void changeSelectedIndex(int index) {
     setState(() {
@@ -37,10 +42,24 @@ class _MBottomNavState extends State<MBottomNav> {
       _debounce!.cancel();
     }
 
-    _debounce = Timer(Duration(milliseconds: 500), () {
-      if (value.isNotEmpty) {
-        _handleSearch(value);
+    _debounce = Timer(Duration(milliseconds: 500), () async {
+      if (value.isEmpty) {
+        setState(() {
+          _movies = [];
+          _isSearching = false;
+        });
+        return;
       }
+
+      setState(() {
+        _isSearching = true;
+      });
+
+      await _handleSearch(value);
+
+      setState(() {
+        _isSearching = false;
+      });
     });
   }
 
@@ -68,10 +87,49 @@ class _MBottomNavState extends State<MBottomNav> {
       }
 
       final queriedMovies = data.map((movie) => Movie.fromJson(movie)).toList();
+      final firstQueriedMovie = queriedMovies[0];
+
+      // query appwrite if movie exists in database and update count
+      final result = await AppwriteService.instance.tables.listRows(
+        databaseId: Env.appwriteDatabaseId,
+        tableId: Env.appwriteTableId,
+        queries: [Query.equal("searchTerm", value)],
+      );
+
+      if (result.rows.isNotEmpty) {
+        // search Term exists
+        // update database
+        final existingMovie = result.rows[0];
+        await AppwriteService.instance.tables.updateRow(
+          databaseId: Env.appwriteDatabaseId,
+          tableId: Env.appwriteTableId,
+          rowId: existingMovie.$id,
+          data: {"count": existingMovie.data["count"] + 1},
+        );
+        return;
+      } else {
+        // create new record for searchTerm
+        final newRecord = TrendingMovie(
+          searchTerm: value,
+          count: 1,
+          posterUrl:
+              'https://image.tmdb.org/t/p/w500${firstQueriedMovie.posterPath}',
+          movieId: firstQueriedMovie.id,
+          title: firstQueriedMovie.title,
+        );
+        await AppwriteService.instance.tables.createRow(
+          databaseId: Env.appwriteDatabaseId,
+          tableId: Env.appwriteTableId,
+          rowId: ID.unique(),
+          data: newRecord.toJson(),
+        );
+      }
 
       setState(() {
         _movies = queriedMovies;
       });
+
+      return;
     } catch (e) {
       debugPrint('Error handle search: $e');
       rethrow;
@@ -81,6 +139,7 @@ class _MBottomNavState extends State<MBottomNav> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _controller.clear();
     super.dispose();
   }
 
@@ -202,68 +261,5 @@ class _MBottomNavState extends State<MBottomNav> {
       default:
         return HomeScreen();
     }
-  }
-}
-
-class MBottomNavItem extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isActive;
-  final double paddingVertical;
-  final double paddingHorizontal;
-  final VoidCallback? onTap;
-
-  const MBottomNavItem({
-    super.key,
-    required this.label,
-    required this.icon,
-    this.isActive = false,
-    this.paddingVertical = 12.0,
-    this.paddingHorizontal = 8.0,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        padding: EdgeInsets.symmetric(
-          vertical: paddingVertical,
-          horizontal: paddingHorizontal,
-        ),
-        decoration: BoxDecoration(
-          image: isActive
-              ? DecorationImage(image: AssetImage(MImage.highlight))
-              : null,
-          borderRadius: isActive
-              ? BorderRadius.circular(50.0)
-              : BorderRadius.circular(0.0),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon
-            Icon(
-              icon,
-              color: isActive ? Colors.black : Colors.grey,
-              size: 25.0,
-            ),
-            SizedBox(width: 4.0),
-            // Label
-            if (isActive)
-              Text(
-                label,
-                style: TextStyle(
-                  color: MColor.dark,
-                  fontWeight: FontWeight.w800,
-                  fontSize: MSize.medium,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 }
