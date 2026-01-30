@@ -141,7 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   margin: EdgeInsets.symmetric(vertical: 18.0),
                   child: MSearchBar(
                     controller: _controller,
-                    onChanged: _handleSearch,
+                    onChanged: _onSearchChanged,
                   ),
                 ),
                 Column(
