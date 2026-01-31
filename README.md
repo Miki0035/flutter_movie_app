@@ -29,10 +29,10 @@ check it out 😮 and let me know what you think.
 
 ## <a name="tech-stack">⚙️ Tech Stack </a>
 
-- Flutter 3.35.7
-- Dart 3.9.2
-- Appwrite
-- TMDB API
+- [Flutter](https://flutter.dev/) 
+- [Dart](https://dart.dev/)
+- [Appwrite](https://appwrite.io/)
+- [TMDB](https://www.themoviedb.org/)
 
 ## <a name="features">🔋 Features</a>
 
