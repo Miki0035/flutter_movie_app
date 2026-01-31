@@ -43,7 +43,7 @@ check it out 😮 and let me know what you think.
 👉 **Movie Search**: instantly find any movie by name with fast and accurate results
 
 ## <a name="demo"> 🎬 Demo Video </a>
-👉 https://youtube.com/shorts/iqqB7slkiGg?feature=share
+👉 https://youtube.com/shorts/iqqB7slkiGg
 
 
 ## <a name="quick-start"> 🤸 Quick Start </a>
